@@ -1,0 +1,5 @@
+fastapi
+uvicorn[standard]
+pydantic-settings
+python-dotenv  # To load .env file implicitly with pydantic-settings
+loguru
