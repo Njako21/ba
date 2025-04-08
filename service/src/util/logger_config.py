@@ -4,7 +4,7 @@ import os
 from loguru import logger
 
 # Import settings from your config file
-from src.config import settings
+from src.util.config import settings
 
 def setup_logging():
     """Configures the Loguru logger based on settings."""
@@ -26,7 +26,7 @@ def setup_logging():
     try:
         os.makedirs(log_directory, exist_ok=True)
     except OSError as e:
-        logger.error(f"Error creating log directory {log_directory}: {e}")
+        log(f"Error creating log directory {log_directory}: {e}", level="error")
         return # Stop configuration if directory cannot be created
 
     # --- Define the filename pattern using time formatting ---
@@ -34,7 +34,7 @@ def setup_logging():
     log_file_pattern = os.path.join(log_directory, "{time:YYYY-MM-DD}.log")
     # --- ---
 
-    logger.info(f"Setting up file logging pattern: {log_file_pattern}") # Log the pattern being used
+    log(f"Setting up file logging pattern: {log_file_pattern}") # Log the pattern being used
 
     logger.add(
         log_file_pattern, # <-- Use the pattern here
@@ -47,11 +47,23 @@ def setup_logging():
         catch=True
     )
 
-    logger.info("Logger configured successfully.")
-    logger.info(f"Console log level: {settings.LOG_LEVEL_CONSOLE}")
-    logger.info(f"File log level: {settings.LOG_LEVEL_FILE}")
+    log("Logger configured successfully.")
+    log(f"Console log level: {settings.LOG_LEVEL_CONSOLE}")
+    log(f"File log level: {settings.LOG_LEVEL_FILE}")
     # logger.info(f"Log file path: {log_file_path}") # Path is now dynamic
-    logger.info(f"Log directory: {log_directory}")
-    logger.info(f"Log rotation: {settings.LOG_ROTATION}")
-    logger.info(f"Log retention: {settings.LOG_RETENTION}")
-    logger.info(f"Async logging: {settings.LOG_ASYNC}")
+    log(f"Log directory: {log_directory}")
+    log(f"Log rotation: {settings.LOG_ROTATION}")
+    log(f"Log retention: {settings.LOG_RETENTION}")
+    log(f"Async logging: {settings.LOG_ASYNC}")
+
+def log(message, level="info"):
+    if level == "info":
+        logger.info(message)
+    elif level == "warning":
+        logger.warning(message)
+    elif level == "error":
+        logger.error(message)
+    elif level == "debug":
+        logger.debug(message)
+    else:
+        logger.info(message)

@@ -2,62 +2,89 @@
 from fastapi import APIRouter, HTTPException, status
 from pydantic import BaseModel
 
-# Import the shared PubSubManager instance
-from src.pubsub import pubsub_manager
+from src.util.logger_config import log
 
-from loguru import logger
+from src.util.response_formatter import format_api_response
+from src.util.gitlab import validate_gitlab_token, get_user_repositories
 
-# Define router for REST endpoints
-# Note: Prefix '/api' will be added in main.py
+
 router = APIRouter()
 
 # --- GET Endpoints ---
+@router.get("/get/model/data/repositories")
+async def get_repositories(token: str):
+    log(f"GET /get/model/data/repositories called with token: {token}")
 
-@router.get("/get/hello/{name}")
-async def get_hello(name: str):
-    """Simple GET endpoint example."""
-    logger.info(f"GET /get/hello/{name} called")
-    return {"message": f"Hello, {name}!"}
+    if not validate_gitlab_token(token):
+        log("Invalid GitLab token provided.", level="error")
+        raise HTTPException(status_code=401, detail="Invalid GitLab token.")
 
-@router.get("/get/data")
-async def get_some_data():
-    """Another GET endpoint example."""
-    logger.info("GET /get/data called")
-    # In a real app, you might fetch this from a database
-    return {"id": 123, "value": "Some data retrieved", "is_active": True}
+    repositories = get_user_repositories(token)
+    if not repositories:
+        log("No repositories found.", level="warning")
+        raise HTTPException(status_code=404, detail="No repositories found.")
+
+    return format_api_response(status="success", data=repositories)
+
+
+@router.get("/get/model/data/repository/{repo_id}")
+async def get_repository(repo_id: str):
+    return format_api_response(
+        status="error",
+        data={"message": f"not implemented yet /get/model/data/repository/"}
+    )
+
+
+@router.get("/get/model/data/training/{repo_id}")
+async def get_training(repo_id: str):
+    return format_api_response(
+        status="error",
+        data={"message": f"not implemented yet /get/model/data/training/"}
+    )
+
+
+@router.get("/get/model/schedule/{repo_id}")
+async def get_schedule(repo_id: str):
+    return format_api_response(
+        status="error",
+        data={"message": f"not implemented yet /get/model/schedule/"}
+    )
+
+
+@router.get("/get/model/training/status/{repo_id}")
+async def get_training_status(repo_id: str):
+    return format_api_response(
+        status="error",
+        data={"message": f"not implemented yet /get/model/training/status/"}
+    )
 
 
 # --- POST Endpoints ---
 
-class Item(BaseModel):
-    """Example Pydantic model for POST request body."""
-    name: str
-    description: str | None = None
-    price: float
-    is_offer: bool | None = None
+@router.post("/post/model/start/training/{repo_id}")
+async def post_training(repo_id: str):
+    return format_api_response(
+        status="error",
+        data={"message": f"not implemented yet /post/model/start/training/"}
+    )
 
-@router.post("/post", status_code=status.HTTP_201_CREATED)
-async def create_item(item: Item):
-    """
-    POST endpoint example.
-    Receives an item and publishes a notification to subscribers.
-    """
-    logger.info(f"POST /post called with item: {item.model_dump()}")
+@router.post("/post/model/stop/training/{repo_id}")
+async def post_training(repo_id: str):
+    return format_api_response(
+        status="error",
+        data={"message": f"not implemented yet /post/model/stop/training/"}
+    )
 
-    # Here you would typically save the item to a database
+@router.post("/post/model/change/schedule/{repo_id}")
+async def post_schedule(repo_id: str):
+    return format_api_response(
+        status="error",
+        data={"message": f"not implemented yet /post/model/change/schedule/"}
+    )
 
-    # Publish a notification about the new item to all subscribers
-    try:
-        # You can publish the whole item dict or just a summary string
-        await pubsub_manager.publish(f"New item created: {item.name} (Price: {item.price})")
-        # Alternatively publish structured data (e.g., JSON string or dict)
-        # import json
-        # await pubsub_manager.publish(json.dumps({"event": "item_created", "data": item.model_dump()}))
-    except Exception as e:
-        logger.error(f"Failed to publish message after creating item: {e}")
-        # Decide if failure to publish should cause a server error response
-        # raise HTTPException(status_code=500, detail="Item created but failed to notify subscribers")
-
-    return {"message": "Item created successfully", "item_received": item}
-
-# Add more GET and POST endpoints as needed following the pattern /get/... or /post
+@router.post("/post/model/set/schedule/{repo_id}")
+async def post_schedule(repo_id: str):
+    return format_api_response(
+        status="error",
+        data={"message": f"not implemented yet /post/model/set/schedule/"}
+    )

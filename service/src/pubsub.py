@@ -2,7 +2,7 @@
 import asyncio
 from typing import List, Dict, Any
 
-from loguru import logger
+from src.util.logger_config import log
 
 class PubSubManager:
     """Manages WebSocket connections and message broadcasting for Pub/Sub."""
@@ -11,30 +11,30 @@ class PubSubManager:
         # Store active connections/queues. Using a list of queues for simplicity.
         # For very high scale, consider different structures or external message brokers.
         self._subscribers: List[asyncio.Queue] = []
-        logger.info("PubSubManager initialized.")
+        log("PubSubManager initialized.")
 
     async def subscribe(self) -> asyncio.Queue:
         """Adds a new subscriber queue and returns it."""
         queue = asyncio.Queue()
         self._subscribers.append(queue)
-        logger.info(f"New subscriber added. Total: {len(self._subscribers)}")
+        log(f"New subscriber added. Total: {len(self._subscribers)}")
         return queue
 
     async def unsubscribe(self, queue: asyncio.Queue):
         """Removes a subscriber queue."""
         try:
             self._subscribers.remove(queue)
-            logger.info(f"Subscriber removed. Total: {len(self._subscribers)}")
+            log(f"Subscriber removed. Total: {len(self._subscribers)}")
         except ValueError:
-            logger.warning("Attempted to remove a queue that was not subscribed.")
+            log("Attempted to remove a queue that was not subscribed.", level="warning")
 
     async def publish(self, message: Any):
         """Sends a message to all active subscribers."""
         if not self._subscribers:
-            logger.info("Publish requested, but no subscribers are connected.")
+            log("Publish requested, but no subscribers are connected.")
             return
 
-        logger.info(f"Publishing message to {len(self._subscribers)} subscribers.")
+        log(f"Publishing message to {len(self._subscribers)} subscribers.")
         # Use asyncio.gather for potential concurrency benefits if putting is slow,
         # though for simple puts it might be negligible overhead.
         # Handle potential errors during put if queues are bounded or closed.

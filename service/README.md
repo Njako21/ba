@@ -23,7 +23,7 @@ This project demonstrates a robust FastAPI application implementing a Publish/Su
 * **CORS Middleware**: Configured to allow requests from specified origins.
 * **Structured Code**: Organized into modules for configuration, pub/sub logic, routers, and logging.
 
-##  Prerequisites
+## 🛠 Prerequisites
 
 * Python 3.8 or higher
 * `pip` (Python package installer)
@@ -33,8 +33,92 @@ This project demonstrates a robust FastAPI application implementing a Publish/Su
 
 Follow these steps to set up and run the project locally.
 
-**1. Clone the Repository**
+### 1. Clone the Repository
 
 ```bash
 git clone <your-repository-url> # Replace with your repo URL
 cd <repository-directory-name> # Replace with the name of the cloned directory
+```
+
+### 2. Create a Virtual Environment
+
+```bash
+python -m venv venv
+source venv/bin/activate # On Windows: venv\Scripts\activate
+```
+
+### 3. Install Dependencies
+
+```bash
+pip install -r service/requirements.txt
+```
+
+### 4. Configure Environment Variables
+
+Copy the `.env-example` file to `.env` and modify it as needed:
+
+```bash
+cp service/.env-example service/.env
+```
+
+### 5. Run the Application
+
+Start the FastAPI application using `uvicorn`:
+
+```bash
+python service/run.py
+```
+
+The application will be available at `http://localhost:8000`.
+
+## 📖 Usage
+
+### REST Endpoints
+
+* **GET** `/api/get/hello/{name}`: Returns a greeting message.
+* **GET** `/api/get/data`: Fetches sample data.
+* **POST** `/api/post`: Creates an item and notifies subscribers.
+
+### Streaming Endpoint
+
+* **GET** `/api/stream`: Subscribes to real-time updates using Server-Sent Events (SSE).
+
+### Root Endpoint
+
+* **GET** `/`: Basic health check or welcome message.
+
+## 🧪 Testing
+
+You can test the endpoints using tools like [Postman](https://www.postman.com/) or `curl`. For example:
+
+```bash
+curl http://localhost:8000/api/get/hello/World
+```
+
+## 📂 Project Structure
+
+```
+service/
+├── run.py                 # Entry point for running the application
+├── requirements.txt       # Python dependencies
+├── .env-example           # Example environment variables
+├── src/
+│   ├── main.py            # FastAPI application setup
+│   ├── config.py          # Configuration using pydantic-settings
+│   ├── logger_config.py   # Loguru logger configuration
+│   ├── pubsub.py          # Pub/Sub manager for real-time updates
+│   ├── routers/
+│   │   ├── rest_endpoints.py  # REST API endpoints
+│   │   ├── stream_endpoints.py # Streaming API endpoints
+│   │   └── __init__.py    # Router module initialization
+│   └── __init__.py        # Source module initialization
+└── logs/                  # Directory for log files (auto-created)
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to submit a pull request or open an issue.
+
+## 📜 License
+
+This project is licensed under the MIT License. See the `LICENSE` file for details.

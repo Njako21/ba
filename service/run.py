@@ -1,13 +1,29 @@
 # run.py
 import uvicorn
-import logging
+from src.util.logger_config import log, setup_logging
+from dotenv import load_dotenv
+import os
+
+load_dotenv() 
+
+setup_logging()
 
 if __name__ == "__main__":
-    logging.info("Starting Uvicorn server...")
+    ENVport = int(os.getenv("PORT", 8000))
+    ENVrunmode = os.getenv("RUN_MODE", "prod")
+    ENVhost = os.getenv("HOST", "localhost")
+
+    logMode = "info"
+    reloadMode = False
+    if ENVrunmode == "dev":
+        reloadMode = True
+        logMode = "debug"
+
+    log("Starting Uvicorn server...")
     uvicorn.run(
         "src.main:app",
-        host="0.0.0.0",
-        port=8000,
-        reload=True, # Enable auto-reload for development
-        log_level="info" # Match log level in main.py if desired
+        host=ENVhost,
+        port=ENVport,
+        reload=reloadMode,
+        log_level=logMode
     )

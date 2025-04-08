@@ -1,33 +1,23 @@
-# src/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-# Remove standard logging import if you had one
-# import logging
-# import sys
 
-# Import Loguru logger and the setup function
-from loguru import logger
-from src.logger_config import setup_logging
+from src.util.logger_config import log
 
-# Import settings and routers
-from src.config import settings
+from src.util.config import settings
 from src.routers import rest_endpoints, stream_endpoints
 
-# --- CONFIGURE LOGGING ---
-# Call the setup function BEFORE initializing FastAPI or doing anything else
-# that might log. This ensures all logs use the new configuration.
-setup_logging()
+from src.util.response_formatter import format_api_response
 
 # --- FastAPI App Initialization ---
-logger.info("Initializing FastAPI application...")
+log("Initializing FastAPI application...")
 app = FastAPI(
-    title="FastAPI Pub/Sub Example",
-    description="Demonstrates REST and Streaming endpoints with Pub/Sub pattern.",
+    title="The api",
+    description="api for the project",
     version="1.0.0"
 )
 
 # --- CORS Middleware Configuration ---
-logger.info(f"Configuring CORS with allowed origins: {settings.ALLOWED_ORIGINS}")
+log(f"Configuring CORS with allowed origins: {settings.ALLOWED_ORIGINS}")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.ALLOWED_ORIGINS,
@@ -37,37 +27,26 @@ app.add_middleware(
 )
 
 # --- Include Routers ---
-logger.info("Including API routers...")
+log("Including API routers...")
 app.include_router(rest_endpoints.router, prefix="/api")
 app.include_router(stream_endpoints.router, prefix="/api")
 
 # --- Root Endpoint ---
 @app.get("/")
 async def root():
-    """Basic root endpoint for health check or info."""
-    logger.info("Root endpoint '/' accessed.")
-    return {"message": "Welcome to the FastAPI Pub/Sub Example!"}
+    log("Root endpoint '/' accessed.")
+    return format_api_response(
+        status="success",
+        data={"message": "WELCOME go to /docs for API documentation."}
+    )
 
-# --- Optional Startup/Shutdown Events ---
 @app.on_event("startup")
 async def startup_event():
-    # Log using Loguru
-    logger.info("Application startup sequence initiated.")
-    # Example: Simulate connecting to a hypothetical database
-    # logger.debug("Connecting to database...")
-    # await asyncio.sleep(0.1) # Simulate async operation
-    # logger.info("Database connection established (simulated).")
-    logger.info("Application startup complete.")
+    log("Application startup sequence initiated.")
+    log("Application startup complete.")
 
 
 @app.on_event("shutdown")
 async def shutdown_event():
-    logger.info("Application shutting down.")
-    # Example: Simulate cleanup
-    # logger.debug("Closing database connection...")
-    # await asyncio.sleep(0.1) # Simulate async operation
-    # logger.info("Database connection closed (simulated).")
-    logger.info("Shutdown complete.")
-
-# Uvicorn command remains the same:
-# uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
+    log("Application shutting down.")
+    log("Shutdown complete.")

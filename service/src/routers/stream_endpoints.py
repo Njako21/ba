@@ -7,7 +7,7 @@ import json # If you want to send JSON data
 # Import the shared PubSubManager instance
 from src.pubsub import pubsub_manager
 
-from loguru import logger
+from src.util.logger_config import log
 
 # Define router for streaming endpoints
 # Note: Prefix '/api' will be added in main.py
@@ -19,7 +19,7 @@ async def stream_events(request: Request):
     Establishes an SSE connection. Clients subscribing here will receive
     messages published via pubsub_manager.publish().
     """
-    logger.info(f"Client {request.client.host}:{request.client.port} connecting to SSE stream.")
+    log(f"Client {request.client.host}:{request.client.port} connecting to SSE stream.")
 
     # Create a new queue for this specific client connection
     client_queue = await pubsub_manager.subscribe()
@@ -32,7 +32,7 @@ async def stream_events(request: Request):
                 # Note: This check might not be foolproof in all network conditions
                 disconnect_check = await request.is_disconnected()
                 if disconnect_check:
-                    logger.warning(f"Client {request.client.host}:{request.client.port} disconnected (checked before queue wait).")
+                    log(f"Client {request.client.host}:{request.client.port} disconnected (checked before queue wait).", level="warning")
                     break
 
                 try:
@@ -51,18 +51,18 @@ async def stream_events(request: Request):
                     yield ": keep-alive\n\n"
                     continue # Continue loop to wait again
                 except asyncio.CancelledError:
-                    logger.info(f"Event generator cancelled for {request.client.host}:{request.client.port}.")
+                    log(f"Event generator cancelled for {request.client.host}:{request.client.port}.")
                     break # Exit loop if task is cancelled
                 except Exception as e:
-                    logger.error(f"Error getting message from queue for {request.client.host}: {e}")
+                    log(f"Error getting message from queue for {request.client.host}: {e}", level="error")
                     # Decide if you want to break or continue
                     break
 
         except asyncio.CancelledError:
-             logger.info(f"Event generator task cancelled externally for {request.client.host}:{request.client.port}.")
+             log(f"Event generator task cancelled externally for {request.client.host}:{request.client.port}.")
         finally:
             # Crucial: Unsubscribe the client's queue when they disconnect or an error occurs
-            logger.info(f"Cleaning up resources and unsubscribing client {request.client.host}:{request.client.port}.")
+            log(f"Cleaning up resources and unsubscribing client {request.client.host}:{request.client.port}.")
             await pubsub_manager.unsubscribe(client_queue)
 
     # Return the streaming response
